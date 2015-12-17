@@ -82,6 +82,7 @@
 			var t = 
 			{
 				now: null,
+				acc: 0,
 				dt: 0,
 				last: timestamp(),
 				step: 1/60,
@@ -105,19 +106,19 @@
 			function step()
 			{
 				t.now = timestamp();
-				t.dt = t.dt + Math.min(1, (t.now - t.last) / 1000);
+				t.dt = Math.min(1, (t.now - t.last) / 1000);
+				t.last = t.now; 
 
-				while(t.dt > t.step) 
+				t.acc += t.dt;
+
+				while(t.acc >= t.step) 
 				{
-					t.dt = t.dt - t.step;
+					t.acc -= t.step;
+				    t.time += t.step;
 					update();
 				}
 
-				render(t.dt);
-
-				t.time += (t.now - t.last);
-				t.last = t.now; 
-			  
+				render();
 				requestAnimationFrame(step);
 			}
 
@@ -128,7 +129,7 @@
 
 			function render()
 			{
-				ctx.clear();
+				//clear();
 				ctx.beginPath();
 				ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI, false);
 				ctx.fillStyle = ball.c;
@@ -138,23 +139,52 @@
 				ctx.stroke();
 			}
 
+			function clear()
+			{
+				ctx.clearRect(0, 0, 800, 800);
+			}
+
 			step();
 
-			var ivl = setInterval(function()
+			lerpEaseInOut();
+
+			function lerpNormal()
 			{
-				Lerppu.stop('testlerpx');
-				Lerppu.stop('testlerpy');
-
-				Lerppu.ip(ball.x, Math.floor(Math.random() * (800 - ball.r)), 750, function(l)
+				var ivl = setInterval(function()
 				{
-					ball.x = l;
-				}, 'testlerpx');
+					Lerppu.stop('testlerpx');
+					Lerppu.stop('testlerpy');
 
-				Lerppu.ip(ball.y, Math.floor(Math.random() * (800 - ball.r)), 750, function(l)
+					Lerppu.ip(ball.x, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					{
+						ball.x = l;
+					}, Lerppu.easings.lerp2, 'testlerpx');
+
+					Lerppu.ip(ball.y, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					{
+						ball.y = l;
+					}, Lerppu.easings.lerp2, 'testlerpy');
+				}, 900);
+			}
+
+			function lerpEaseInOut()
+			{
+				var ivl = setInterval(function()
 				{
-					ball.y = l;
-				}, 'testlerpy');
-			}, 900);
+					Lerppu.stop('testlerpx');
+					Lerppu.stop('testlerpy');
+
+					Lerppu.ip(ball.x, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					{
+						ball.x = l;
+					}, Lerppu.easings.easeInOutCubic, 'testlerpx');
+
+					Lerppu.ip(ball.y, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					{
+						ball.y = l;
+					}, Lerppu.easings.easeInOutCubic, 'testlerpy');
+				}, 900);
+			}
 
 		</script>
 	</body>
