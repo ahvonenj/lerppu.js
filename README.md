@@ -12,7 +12,7 @@ In update loop / function, call:
 Lerppu.update(t.time);
 ```
 
-Where t.time is the accurate elapsed time since your application started.
+Where t.time is the accurate elapsed time since your application started. This makes Lerppu update all interpolations you have defined. If `Lerppu.update()` is not called, then Lerppu will not do anything, even if you specify an interpolation.
 
 **Creating interpolations**
 
