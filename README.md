@@ -33,6 +33,14 @@ func = `function(l) { player.x = l; }` (l is calculated by Lerppu; it is a value
 easing = Lerppu has these covered, for example `Lerppu.easings.lerp2` is valid here
 lerp_id = Optional id for the interpolation, in case you would like to cancel it
 
+**Stopping / interrupting interpolations**
+
+Just call
+
+```
+Lerppu.stop(lerp_id);
+```
+
 **Supported easings**
 
 ```
