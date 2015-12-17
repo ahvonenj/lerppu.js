@@ -27,10 +27,15 @@ Lerppu.interpolate(v0, v1, t, function(l)
 Say you wanted to interpolate the x-position of a "player", you would put the parameters like so:
 
 v0 = `player.x` (current x)
+
 v1 = where would you like the `player.x` to be after `t` has elapsed
+
 t = how long do you want the transition to take
+
 func = `function(l) { player.x = l; }` (l is calculated by Lerppu; it is a value going from `v0` to `v1` in `t` amount of time)
+
 easing = Lerppu has these covered, for example `Lerppu.easings.lerp2` is valid here
+
 lerp_id = Optional id for the interpolation, in case you would like to cancel it
 
 **Stopping / interrupting interpolations**
