@@ -1,6 +1,8 @@
 # lerppu.js
 
-JavaScript function interpolation micro-library.
+JavaScript function interpolation micro-library. Allows for interpolation of any function that handles numeric values(*), with different easing functions to choose from.
+
+* color, time, opacity, distance, rotation, speed, velocity, mass, ...
 
 ## Usage
 
