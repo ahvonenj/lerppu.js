@@ -40,6 +40,17 @@ easing = Lerppu has these covered, for example `Lerppu.easings.lerp2` is valid h
 
 lerp_id = Optional id for the interpolation, in case you would like to cancel it
 
+**Multivariable interpolation (as of 20.12.2015)**
+
+```
+Lerppu.interpolate([v0a, v0b, v0c, ...], [v1a, v1b, v1c, ...], t, function(l)
+{
+    player.x = l[0];
+    player.y = l[1];
+    player.z = l[2];
+}, easing, lerp_id);
+```
+
 **Stopping / interrupting interpolations**
 
 Just call
