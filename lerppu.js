@@ -3,13 +3,31 @@ var Lerppu =
 	time: 0, // Program / game elapsed time
 	lerps: [],
 
-	interpolate: function(v0, v1, t, f, easing, id)
+	interpolate: function(v0, v1, t, f, easing, id, callback)
 	{
 		var self = this;
 
-		var id = id || null;
+		var multiple = null; // Does v0 have multiple values to interpolate
+		var nto1 = null; // Do v0 values have corresponding v1 or is there only one v1
 
-		this.lerps.push(
+		if(Object.prototype.toString.call(v0) === '[object Array]') 
+		{
+			multiple = true;
+
+			if(Object.prototype.toString.call(v1) === '[object Array]' && v0.length === v1.length) 
+			{
+				nto1 = false;
+			}
+			else
+			{
+				nto1 = true;
+			}
+		}
+
+		var id = id || null;
+		var callback = callback || function() {};
+
+		var lerp = 
 		{
 			v0: v0,
 			v1: v1,
@@ -17,8 +35,16 @@ var Lerppu =
 			st: self.time,
 			f: f,
 			easing: easing,
-			id: id
-		});
+			id: id,
+			callback: callback,
+			complete: false,
+			multiple: multiple,
+			nto1: nto1
+		}
+
+		this.lerps.push(lerp);
+
+		return lerp;
 	},
 
 	update: function(time)
@@ -31,12 +57,37 @@ var Lerppu =
 		{
 			var lerp = this.lerps[i];
 			var ct = Math.min((self.time - lerp.st) / lerp.t, 1);
-			var lr = lerp.easing(lerp.v0, lerp.v1, ct);
+
+			if(lerp.multiple)
+			{
+				var lr = [];
+
+				if(lerp.nto1)
+				{
+					lerp.v0.forEach(function(v, i)
+					{
+						lr.push(lerp.easing(v, lerp.v1, ct));
+					});
+				}
+				else
+				{
+					for(var j = 0; j < lerp.v0.length; j++)
+					{
+						lr.push(lerp.easing(lerp.v0[j], lerp.v1[j], ct));
+					}
+				}
+			}
+			else
+			{
+				var lr = lerp.easing(lerp.v0, lerp.v1, ct);
+			}
 
 			lerp.f(lr);
 
 			if(ct >= 1)
 			{
+				lerp.callback();
+				lerp.complete = true;
 				self.lerps.splice(i, 1);
 				continue;
 			}
@@ -58,6 +109,20 @@ var Lerppu =
 			{
 				continue;
 			}
+		}
+	},
+
+	find: function(id)
+	{
+		if(this.lerps.length === 0 || 
+		this.lerps.indexOf(id) === -1 || 
+		typeof this.lerps[id] === 'undefined')
+		{
+			return null;
+		}
+		else
+		{
+			return this.lerps[id];
 		}
 	},
 

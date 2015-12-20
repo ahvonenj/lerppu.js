@@ -31,22 +31,33 @@
 				display: flex;
 
 				width: 100%;
-				height: 100%;
+				height: auto;
 
 				font-family: Roboto, Consolas, Arial;
+
+				overflow-y: auto;
+
+				padding: 15px 0px 15px 0px;
 			}
 
 			#wrapper h1
 			{
-				padding-bottom: 10px;
+				padding-bottom: 45px;
+
 			}
 
-			#canv
+			.canv
 			{
 				width: 800px;
 				height: 800px;
 
 				border: 1px solid black;
+			}
+
+			.canv:not(:first-child)
+			{
+				margin-top: 15px;
+				margin-bottom: 45px;
 			}
 		</style>
 		<script src = "lerppu.js"></script>
@@ -54,7 +65,18 @@
 	<body>
 		<div id = "wrapper">
 			<h1>lerppu.js</h1>
-			<canvas id = "canv"></canvas>
+
+			<h2>ease-in-out-cubic (independent x, y)</h2>
+			<canvas id = "canv1" class = "canv"></canvas>
+
+			<h2>accurate linear (single variable)</h2>
+			<canvas id = "canv2" class = "canv"></canvas>
+
+			<h2>multivariable (x, y interpolated together)</h2>
+			<canvas id = "canv3" class = "canv"></canvas>
+
+			<h2>multiple interpolations (unfinished)</h2>
+			<canvas id = "canv4" class = "canv"></canvas>
 		</div>
 
 		<script>
@@ -73,11 +95,22 @@
 				})();
 			}
 
-			var c = document.getElementById("canv");
-			var ctx = c.getContext("2d");
+			var c1 = document.getElementById("canv1");
+			var ctx1 = c1.getContext("2d");
 
-			c.width = 800;
-			c.height = 800;
+			var c2 = document.getElementById("canv2");
+			var ctx2 = c2.getContext("2d");
+
+			var c3 = document.getElementById("canv3");
+			var ctx3 = c3.getContext("2d");
+
+			var c4 = document.getElementById("canv4");
+			var ctx4 = c4.getContext("2d");
+
+			var canvases = [c1, c2, c3, c4];
+			var ctxs = [ctx1, ctx2, ctx3, ctx4];
+
+			canvases.forEach(function(v, i) { v.width = 800; v.height = 800; })
 
 			var t = 
 			{
@@ -89,14 +122,53 @@
 				time: 0
 			};
 
-			var ball =
+			var ball1 =
 			{
 				x: 100,
 				y: 100,
 				r: 15,
 				c: 'red',
-				l: 3
+				l: 3,
+				ctx: ctx1
 			}
+
+			var ball2 =
+			{
+				x: 100,
+				y: 100,
+				r: 15,
+				c: 'red',
+				l: 3,
+				ctx: ctx2
+			}
+
+			var ball3 =
+			{
+				x: 100,
+				y: 100,
+				r: 15,
+				c: 'red',
+				l: 3,
+				ctx: ctx3
+			}
+
+			var balls = []
+
+			for(var i = 0; i < 50; i++)
+			{
+				var b =
+				{
+					x: Math.floor(Math.random() * 100),
+					y: Math.floor(Math.random() * 100),
+					r: Math.floor(Math.random() * 10) + 5,
+					c: 'red',
+					l: 3
+				}
+
+				balls.push(b);
+			}
+
+			var drawables = [ball1, ball2, ball3];
 
 			function timestamp()
 			{
@@ -130,61 +202,138 @@
 			function render()
 			{
 				//clear();
-				ctx.beginPath();
-				ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI, false);
-				ctx.fillStyle = ball.c;
-				ctx.fill();
-				ctx.lineWidth = ball.l;
-				ctx.strokeStyle = 'black';
-				ctx.stroke();
+
+				drawables.forEach(function(v, i)
+				{
+					v.ctx.beginPath();
+					v.ctx.arc(v.x, v.y, v.r, 0, 2 * Math.PI, false);
+					v.ctx.fillStyle = v.c;
+					v.ctx.fill();
+					v.ctx.lineWidth = v.l;
+					v.ctx.strokeStyle = 'black';
+					v.ctx.stroke();
+				});
+
+				balls.forEach(function(v, i)
+				{
+					ctx4.beginPath();
+					ctx4.arc(v.x, v.y, v.r, 0, 2 * Math.PI, false);
+					ctx4.fillStyle = v.c;
+					ctx4.fill();
+					ctx4.lineWidth = v.l;
+					ctx4.strokeStyle = 'black';
+					ctx4.stroke();
+				})
 			}
 
 			function clear()
 			{
-				ctx.clearRect(0, 0, 800, 800);
+				ctx1.clearRect(0, 0, 800, 800);
+				ctx2.clearRect(0, 0, 800, 800);
+				ctx3.clearRect(0, 0, 800, 800);
+				ctx4.clearRect(0, 0, 800, 800);
+				ctx5.clearRect(0, 0, 800, 800);
 			}
 
 			step();
 
 			lerpEaseInOut();
-
-			function lerpNormal()
-			{
-				var ivl = setInterval(function()
-				{
-					Lerppu.stop('testlerpx');
-					Lerppu.stop('testlerpy');
-
-					Lerppu.ip(ball.x, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
-					{
-						ball.x = l;
-					}, Lerppu.easings.lerp2, 'testlerpx');
-
-					Lerppu.ip(ball.y, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
-					{
-						ball.y = l;
-					}, Lerppu.easings.lerp2, 'testlerpy');
-				}, 900);
-			}
+			lerpNormal();
+			lerpMultivar();
+			//lerpStress(balls);
 
 			function lerpEaseInOut()
 			{
 				var ivl = setInterval(function()
 				{
-					Lerppu.stop('testlerpx');
-					Lerppu.stop('testlerpy');
+					Lerppu.stop('testlerpx1');
+					Lerppu.stop('testlerpy1');
 
-					Lerppu.ip(ball.x, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					Lerppu.ip(ball1.x, Math.floor(Math.random() * (800 - ball1.r)), 0.5, function(l)
 					{
-						ball.x = l;
-					}, Lerppu.easings.easeInOutCubic, 'testlerpx');
+						ball1.x = l;
+					}, Lerppu.easings.easeInOutCubic, 'testlerpx1');
 
-					Lerppu.ip(ball.y, Math.floor(Math.random() * (800 - ball.r)), 0.5, function(l)
+					Lerppu.ip(ball1.y, Math.floor(Math.random() * (800 - ball1.r)), 0.5, function(l)
 					{
-						ball.y = l;
-					}, Lerppu.easings.easeInOutCubic, 'testlerpy');
+						ball1.y = l;
+					}, Lerppu.easings.easeInOutCubic, 'testlerpy1');
 				}, 900);
 			}
+
+			function lerpNormal()
+			{
+				var ivl = setInterval(function()
+				{
+					Lerppu.stop('testlerp2');
+
+					if(Math.floor(Math.random() * 100 > 50))
+					{
+						Lerppu.ip(ball2.x, Math.floor(Math.random() * (800 - ball2.r)), 0.5, function(l)
+						{
+							ball2.x = l;
+						}, Lerppu.easings.lerp2, 'testlerp2');
+					}
+					else
+					{
+						Lerppu.ip(ball2.y, Math.floor(Math.random() * (800 - ball2.r)), 0.5, function(l)
+						{
+							ball2.y = l;
+						}, Lerppu.easings.lerp2, 'testlerp2');
+					}
+
+					
+
+					/*Lerppu.ip(ball2.y, Math.floor(Math.random() * (800 - ball2.r)), 0.5, function(l)
+					{
+						ball2.y = l;
+					}, Lerppu.easings.lerp2, 'testlerpy2');*/
+				}, 900);
+			}
+
+			function lerpMultivar()
+			{
+				var ivl = setInterval(function()
+				{
+					Lerppu.stop('testlerp3');
+
+					var rx = Math.floor(Math.random() * (800 - ball3.r));
+					var ry = Math.floor(Math.random() * (800 - ball3.r));
+
+					Lerppu.ip([ball3.x, ball3.y], [rx, ry], 0.5, function(l)
+					{
+						ball3.x = l[0];
+						ball3.y = l[1];
+					}, Lerppu.easings.easeInOutQuart, 'testlerp3');
+				}, 900);
+			}
+
+			/*function lerpStress(balls)
+			{
+				var ivl = setInterval(function()
+				{
+
+					for(var i = 0; i < balls.length; i++)
+					{
+						Lerppu.stop('stresslerp' + i);
+					}
+
+					for(var i = 0; i < balls.length; i++)
+					{
+						var rx = Math.floor(Math.random() * (800 - balls[i].r));
+						var ry = Math.floor(Math.random() * (800 - balls[i].r));
+						var b = balls[i];
+
+						Lerppu.ip([b.x, b.y], [rx, ry], 0.5, function(l)
+						{
+							b.x = l[0];
+							b.y = l[1];
+						}, Lerppu.easings.lerp2, 'stresslerp' + i);
+					}
+
+					
+				}, 900);
+			}*/
 
 		</script>
 	</body>
