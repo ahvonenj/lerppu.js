@@ -88,7 +88,7 @@ var Lerppu =
 
 		this.interpolations.push(lerppu);
 
-		return lerp;
+		return lerppu;
 	},
 
 	update: function(time)
