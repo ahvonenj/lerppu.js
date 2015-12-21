@@ -83,6 +83,9 @@
 			<h2>types of interpolation (color, opacity, size)</h2>
 			<canvas id = "canv5" class = "canv"></canvas>
 
+			<h2>object property interpolation</h2>
+			<canvas id = "canv6" class = "canv"></canvas>
+
 			<h2>multiple interpolations (unfinished)</h2>
 			<canvas id = "canv4" class = "canv"></canvas>
 		</div>
@@ -137,8 +140,11 @@
 			var c5 = document.getElementById("canv5");
 			var ctx5 = c5.getContext("2d");
 
-			var canvases = [c1, c2, c3, c4, c5];
-			var ctxs = [ctx1, ctx2, ctx3, ctx4, ctx5];
+			var c6 = document.getElementById("canv6");
+			var ctx6 = c6.getContext("2d");
+
+			var canvases = [c1, c2, c3, c4, c5, c6];
+			var ctxs = [ctx1, ctx2, ctx3, ctx4, ctx5, ctx6];
 
 			canvases.forEach(function(v, i) { v.width = 800; v.height = 800; })
 
@@ -196,6 +202,16 @@
 				rgba: [255, 0, 0, 1]
 			}
 
+			var ball5 =
+			{
+				x: 100,
+				y: 100,
+				r: 15,
+				c: 'red',
+				l: 3,
+				ctx: ctx6
+			}
+
 			var balls = []
 
 			for(var i = 0; i < 50; i++)
@@ -212,7 +228,7 @@
 				balls.push(b);
 			}
 
-			var drawables = [ball1, ball2, ball3];
+			var drawables = [ball1, ball2, ball3, ball5];
 
 			function timestamp()
 			{
@@ -287,11 +303,11 @@
 
 			function clear()
 			{
-				ctx1.clearRect(0, 0, 800, 800);
-				ctx2.clearRect(0, 0, 800, 800);
-				ctx3.clearRect(0, 0, 800, 800);
-				ctx4.clearRect(0, 0, 800, 800);
-				ctx5.clearRect(0, 0, 800, 800);
+
+				ctxs.forEach(function(v, i)
+				{
+					v.clearRect(0, 0, 800, 800);
+				})
 			}
 
 			step();
@@ -301,6 +317,7 @@
 			lerpMultivar();
 			//lerpStress(balls);
 			lerpTypes();
+			lerpObj();
 
 			function lerpEaseInOut()
 			{
@@ -372,9 +389,9 @@
 					var ry = Math.floor(Math.random() * (800 - ball3.r));
 					var rc = 
 					[
-						Math.floor(Math.random() * (254 - 25)) + 25,
-						Math.floor(Math.random() * (254 - 25)) + 25,
-						Math.floor(Math.random() * (254 - 25)) + 25
+						Math.floor(Math.random() * (175 - 25)) + 25,
+						Math.floor(Math.random() * (175 - 25)) + 25,
+						Math.floor(Math.random() * (175 - 25)) + 25
 					];
 					var ro = Math.random();
 
@@ -423,6 +440,19 @@
 
 					}, Lerppu.easings.easeInOutQuad, 'testlerp4');
 				}, 401);
+			}
+
+			function lerpObj()
+			{
+				var ivl = setInterval(function()
+				{
+					Lerppu.stop('objlerp');
+
+					var rx = Math.floor(Math.random() * (800 - ball3.r));
+					var ry = Math.floor(Math.random() * (800 - ball3.r));
+
+					Lerppu.ip(ball5, { x: rx, y: ry }, 0.3, Lerppu.easings.lerp2, 'objlerp');
+				}, 301);
 			}
 
 			/*function lerpStress(balls)

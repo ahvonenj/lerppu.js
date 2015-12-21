@@ -1,7 +1,7 @@
 var Lerppu = 
 {
 	time: 0, // Program / game elapsed time
-	lerps: [],
+	interpolations: [],
 
 	interpolate: function(v0, v1, t, f, easing, id, callback)
 	{
@@ -10,11 +10,15 @@ var Lerppu =
 		var multiple = null; // Does v0 have multiple values to interpolate
 		var nto1 = null; // Do v0 values have corresponding v1 or is there only one v1
 
-		if(Object.prototype.toString.call(v0) === '[object Array]') 
+		var objinterpolation = null; // Are v0 and v1 objects
+		var paramintersection = null; // Intersection of v0 and v1 keys
+
+		if(Object.prototype.toString.call(v0) === '[object Array]') // Array interpolation
 		{
 			multiple = true;
 
-			if(Object.prototype.toString.call(v1) === '[object Array]' && v0.length === v1.length) 
+			// Do we have Array => Array relation or Array => Value relation
+			if(Object.prototype.toString.call(v1) === '[object Array]' && v0.length === v1.length)
 			{
 				nto1 = false;
 			}
@@ -23,26 +27,66 @@ var Lerppu =
 				nto1 = true;
 			}
 		}
+		else if(Object.prototype.toString.call(v0) === '[object Object]') // Object interpolation
+		{
+			objinterpolation = true;
+
+			// Do we have Object => Object relation or Object => Value relation
+			if(Object.prototype.toString.call(v1) === '[object Object]')
+			{
+				nto1 = false;
+
+				paramintersection = this.helpers.intersection(v0, v1);
+
+				if(paramintersection.length === 0)
+				{
+					return;
+				}
+			}
+			else
+			{
+				nto1 = true;
+				paramintersection = Object.keys(v0);
+			}
+
+			// Since f parameter is not specified, we need to "shift" parameters after f
+			callback = id;
+			id = easing;
+			easing = f;
+			
+			// Specify a custom interpolation function for object interpolation
+			f = function(l, paramintersection, o)
+			{
+				for(var i = 0; i < paramintersection.length; i++)
+				{
+					o[paramintersection[i]] = l[i];
+				}
+			}
+		}
 
 		var id = id || null;
 		var callback = callback || function() {};
 
-		var lerp = 
+
+		var lerppu = 
 		{
-			v0: v0,
-			v1: v1,
-			t: t,
-			st: self.time,
-			f: f,
-			easing: easing,
-			id: id,
-			callback: callback,
-			complete: false,
-			multiple: multiple,
-			nto1: nto1
+			v0: v0, // Start value of some kind
+			v1: v1, // End value of some kind
+			t: t, // Timespan
+			st: self.time, // Start time
+			f: f, // Interpolation function
+			easing: easing, // Easing function
+			id: id, // Custom id / name
+			callback: callback, // Complete callback
+			complete: false, // Complete bool
+			multiple: multiple, // Multiple bool
+			nto1: nto1, // nto1 bool
+			objinterpolation: objinterpolation, // Object interpolation bool
+			paramintersection: paramintersection, // Object => Object key intersection
+			paused: false // Is the interpolation paused
 		}
 
-		this.lerps.push(lerp);
+		this.interpolations.push(lerppu);
 
 		return lerp;
 	},
@@ -53,9 +97,10 @@ var Lerppu =
 
 		self.time = time;
 
-		for(var i = 0; i < this.lerps.length; i++)
+		// Go through each ongoing interpolation
+		for(var i = 0; i < this.interpolations.length; i++)
 		{
-			var lerp = this.lerps[i];
+			var lerp = this.interpolations[i];
 			var ct = Math.min((self.time - lerp.st) / lerp.t, 1);
 
 			if(lerp.multiple)
@@ -77,18 +122,37 @@ var Lerppu =
 					}
 				}
 			}
+			else if(lerp.objinterpolation)
+			{
+				var lr = [];
+
+				if(lerp.nto1)
+				{
+					for(var k = 0; k < lerp.paramintersection.length; k++)
+					{
+						lr.push(lerp.easing(lerp.v0[lerp.paramintersection[k]], lerp.v1, ct));
+					}
+				}
+				else
+				{
+					for(var k = 0; k < lerp.paramintersection.length; k++)
+					{
+						lr.push(lerp.easing(lerp.v0[lerp.paramintersection[k]], lerp.v1[lerp.paramintersection[k]], ct));
+					}
+				}
+			}
 			else
 			{
 				var lr = lerp.easing(lerp.v0, lerp.v1, ct);
 			}
 
-			lerp.f(lr);
+			lerp.f(lr, lerp.paramintersection, lerp.v0);
 
 			if(ct >= 1)
 			{
 				lerp.callback();
 				lerp.complete = true;
-				self.lerps.splice(i, 1);
+				self.interpolations.splice(i, 1);
 				continue;
 			}
 		}
@@ -96,13 +160,13 @@ var Lerppu =
 
 	interrupt: function(lerptointerrupt)
 	{
-		for(var i = 0; i < this.lerps.length; i++)
+		for(var i = 0; i < this.interpolations.length; i++)
 		{
-			var lerp = this.lerps[i];
+			var lerp = this.interpolations[i];
 
 			if(lerp.id !== null && lerp.id === lerptointerrupt)
 			{
-				this.lerps.splice(i, 1);
+				this.interpolations.splice(i, 1);
 				break;
 			}
 			else
@@ -114,15 +178,15 @@ var Lerppu =
 
 	find: function(id)
 	{
-		if(this.lerps.length === 0 || 
-		this.lerps.indexOf(id) === -1 || 
-		typeof this.lerps[id] === 'undefined')
+		if(this.interpolations.length === 0 || 
+		this.interpolations.indexOf(id) === -1 || 
+		typeof this.interpolations[id] === 'undefined')
 		{
 			return null;
 		}
 		else
 		{
-			return this.lerps[id];
+			return this.interpolations[id];
 		}
 	},
 
@@ -209,6 +273,22 @@ var Lerppu =
 		easeInOutQuint: function (v0, v1, t) 
 		{ 
 			return t<.5 ? (v1 - v0) * (16*t*t*t*t*t) + v0 : (v1 - v0) * (1+16*(--t)*t*t*t*t) + v0;
+		}
+	},
+
+	helpers:
+	{
+		intersection: function(o1, o2) 
+		{
+			return Object.keys(o1).concat(Object.keys(o2)).sort().reduce(function (r, a, i, aa) 
+			{
+				if (i && aa[i - 1] === a) 
+				{
+					r.push(a);
+				}
+
+				return r;
+			}, []);
 		}
 	}
 }
