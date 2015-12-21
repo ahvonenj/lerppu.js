@@ -189,7 +189,7 @@
 				w: 15,
 				h: 15,
 				c: 'red',
-				l: 3,
+				l: 2,
 				ctx: ctx5,
 				rot: 0,
 
@@ -242,6 +242,8 @@
 			{
 				Lerppu.update(t.time);
 			}
+
+			//ball4.ctx.globalCompositeOperation = 'screen';
 
 			function render()
 			{
@@ -376,13 +378,17 @@
 					];
 					var ro = Math.random();
 
-					if(ro > 0.80)
-						ro = 0.80;
-					if(ro < 0.20)
-						ro = 0.20;
+					if(ro >= 0.9)
+					{
+						ro = 0.9;
+					}
+					else if(ro <= 0.1)
+					{
+						ro = 0.1;
+					}
 
-					var rw = Math.floor(Math.random() * (75 - 5)) + 5;
-					var rh = Math.floor(Math.random() * (75 - 5)) + 5;
+					var rw = Math.floor(Math.random() * (125 - 5)) + 5;
+					var rh = Math.floor(Math.random() * (125 - 5)) + 5;
 
 					Lerppu.ip(
 					[
@@ -416,7 +422,7 @@
 						ball4.rgba[3] = l[7];
 
 					}, Lerppu.easings.easeInOutQuad, 'testlerp4');
-				}, 450);
+				}, 401);
 			}
 
 			/*function lerpStress(balls)
