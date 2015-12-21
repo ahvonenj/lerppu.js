@@ -80,6 +80,9 @@
 			<h2>multivariable (x, y interpolated together)</h2>
 			<canvas id = "canv3" class = "canv"></canvas>
 
+			<h2>types of interpolation (color, opacity, size)</h2>
+			<canvas id = "canv5" class = "canv"></canvas>
+
 			<h2>multiple interpolations (unfinished)</h2>
 			<canvas id = "canv4" class = "canv"></canvas>
 		</div>
@@ -131,8 +134,11 @@
 			var c4 = document.getElementById("canv4");
 			var ctx4 = c4.getContext("2d");
 
-			var canvases = [c1, c2, c3, c4];
-			var ctxs = [ctx1, ctx2, ctx3, ctx4];
+			var c5 = document.getElementById("canv5");
+			var ctx5 = c5.getContext("2d");
+
+			var canvases = [c1, c2, c3, c4, c5];
+			var ctxs = [ctx1, ctx2, ctx3, ctx4, ctx5];
 
 			canvases.forEach(function(v, i) { v.width = 800; v.height = 800; })
 
@@ -174,6 +180,20 @@
 				c: 'red',
 				l: 3,
 				ctx: ctx3
+			}
+
+			var ball4 =
+			{
+				x: 100,
+				y: 100,
+				w: 15,
+				h: 15,
+				c: 'red',
+				l: 3,
+				ctx: ctx5,
+				rot: 0,
+
+				rgba: [255, 0, 0, 1]
 			}
 
 			var balls = []
@@ -251,7 +271,16 @@
 					ctx4.lineWidth = v.l;
 					ctx4.strokeStyle = 'black';
 					ctx4.stroke();
-				})
+				});
+
+				ball4.ctx.beginPath();
+				//ball4.ctx.arc(ball4.x, ball4.y, ball4.r, 0, 2 * Math.PI, false);
+				ball4.ctx.rect(ball4.x, ball4.y, ball4.w, ball4.h);
+				ball4.ctx.fillStyle = 'rgba(' + ball4.rgba[0] + ', ' + ball4.rgba[1] + ', ' + ball4.rgba[2] + ', ' + ball4.rgba[3] + ')';
+				ball4.ctx.fill();
+				ball4.ctx.lineWidth = ball4.l;
+				ball4.ctx.strokeStyle = 'black';
+				ball4.ctx.stroke();
 			}
 
 			function clear()
@@ -260,7 +289,7 @@
 				ctx2.clearRect(0, 0, 800, 800);
 				ctx3.clearRect(0, 0, 800, 800);
 				ctx4.clearRect(0, 0, 800, 800);
-				//ctx5.clearRect(0, 0, 800, 800);
+				ctx5.clearRect(0, 0, 800, 800);
 			}
 
 			step();
@@ -269,6 +298,7 @@
 			lerpNormal();
 			lerpMultivar();
 			//lerpStress(balls);
+			lerpTypes();
 
 			function lerpEaseInOut()
 			{
@@ -328,6 +358,65 @@
 						ball3.y = l[1];
 					}, Lerppu.easings.easeInOutQuart, 'testlerp3');
 				}, 900);
+			}
+
+			function lerpTypes()
+			{
+				var ivl = setInterval(function()
+				{
+					Lerppu.stop('testlerp4');
+
+					var rx = Math.floor(Math.random() * (800 - ball3.r));
+					var ry = Math.floor(Math.random() * (800 - ball3.r));
+					var rc = 
+					[
+						Math.floor(Math.random() * (254 - 25)) + 25,
+						Math.floor(Math.random() * (254 - 25)) + 25,
+						Math.floor(Math.random() * (254 - 25)) + 25
+					];
+					var ro = Math.random();
+
+					if(ro > 0.80)
+						ro = 0.80;
+					if(ro < 0.20)
+						ro = 0.20;
+
+					var rw = Math.floor(Math.random() * (75 - 5)) + 5;
+					var rh = Math.floor(Math.random() * (75 - 5)) + 5;
+
+					Lerppu.ip(
+					[
+						ball4.x, 
+						ball4.y, 
+						ball4.w, 
+						ball4.h, 
+						ball4.rgba[0],
+						ball4.rgba[1],
+						ball4.rgba[2],
+						ball4.rgba[3]
+					], 
+					[
+						rx, 
+						ry, 
+						rw,
+						rh,
+						rc[0],
+						rc[1],
+						rc[2],
+						ro
+					], 0.4, function(l)
+					{
+						ball4.x = l[0];
+						ball4.y = l[1];
+						ball4.w = l[2];
+						ball4.h = l[3];
+						ball4.rgba[0] = Math.floor(l[4]);
+						ball4.rgba[1] = Math.floor(l[5]);
+						ball4.rgba[2] = Math.floor(l[6]);
+						ball4.rgba[3] = l[7];
+
+					}, Lerppu.easings.easeInOutQuad, 'testlerp4');
+				}, 450);
 			}
 
 			/*function lerpStress(balls)
