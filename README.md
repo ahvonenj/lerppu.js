@@ -62,8 +62,8 @@ Lerppu.stop(lerp_id);
 **Supported easings**
 
 ```
-Lerppu.easings.lerp
-Lerppu.easings.lerp2
+Lerppu.easings.lerp / Lerppu.easings.linear
+Lerppu.easings.lerp2 / Lerppu.easings.accurateLinear
 Lerppu.easings.easeInQuad
 Lerppu.easings.easeOutQuad
 Lerppu.easings.easeInOutQuad
