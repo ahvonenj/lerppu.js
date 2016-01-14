@@ -129,13 +129,13 @@ var Lerppu =
 	easings:
 	{
 
-		lerp: function(v0, v1, t) 
+		linear: function(v0, v1, t) 
 		{
 			return v0 + t * (v1 - v0);
 		},
 
 		// Accurate
-		lerp2: function(v0, v1, t) 
+		accurateLinear: function(v0, v1, t) 
 		{
 	  		return (1 - t) * v0 + t * v1;
 		},
@@ -218,3 +218,6 @@ var Lerppu =
 Lerppu.lerp = Lerppu.interpolate;
 Lerppu.ip = Lerppu.interpolate;
 Lerppu.stop = Lerppu.interrupt;
+
+Lerppu.easings.lerp = Lerppu.easings.linear;
+Lerppu.easings.lerp2 = Lerppu.easings.accurateLinear;
