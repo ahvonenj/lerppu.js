@@ -85,7 +85,7 @@ QUnit.module('Lerppu interpolation',
     }
 });
 
-QUnit.test('Interpolation creation', function(assert) 
+QUnit.test('Interpolation creation - normal', function(assert) 
 {
 	var l1 = this.lerppuinstance.interpolate(0, 100, 1, function(l)
 	{
@@ -107,6 +107,31 @@ QUnit.test('Interpolation creation', function(assert)
 	assert.equal(l1.paramintersection, null, 'Returned interpolation object paramintersection');
 
 	assert.equal(this.lerppuinstance.interpolations.length, 1, 'Interpolation count now 1');
+
+});
+
+QUnit.test('Interpolation creation - normal2', function(assert) 
+{
+	var l1 = this.lerppuinstance.interpolate(0, 100, 1, function(l)
+	{
+
+	}, this.lerppuinstance.easings.lerp, 'lerp1');
+
+	console.log(l1);
+
+	assert.equal(typeof l1, 'object', 'Returned interpolation object type check');
+
+	assert.equal(l1.v0, 0, 'Returned interpolation object v0');
+	assert.equal(l1.v1, 100, 'Returned interpolation object v1');
+	assert.equal(l1.complete, false, 'Returned interpolation object complete');
+	assert.equal(l1.easing, this.lerppuinstance.easings.lerp, 'Returned interpolation object  easing');
+	assert.equal(l1.t, 1, 'Returned interpolation object t');
+	assert.equal(l1.multiple, null, 'Returned interpolation object multiple');
+	assert.equal(l1.nto1, null, 'Returned interpolation object nto1');
+	assert.equal(l1.objinterpolation, null, 'Returned interpolation object objinterpolation');
+	assert.equal(l1.paramintersection, null, 'Returned interpolation object paramintersection');
+
+	assert.equal(this.lerppuinstance.interpolations.length, 2, 'Interpolation count now 1');
 
 });
 
