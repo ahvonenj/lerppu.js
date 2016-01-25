@@ -4,7 +4,7 @@ JavaScript function interpolation micro-library. Allows for interpolation of any
 
 * color, time, opacity, distance, rotation, speed, velocity, mass, ...
 
-**NOTE** lerppu.js is basically $.animate or CSS3 animation / transition equivalent for canvas.
+**NOTE:** lerppu.js is basically $.animate or CSS3 animation / transition equivalent for canvas.
 
 ## Usage
 
